@@ -11,3 +11,7 @@ wheels/
 
 # environment vars 
 .env
+
+#others 
+uv.lock
+pyproject.toml
