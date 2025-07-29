@@ -10,7 +10,7 @@ def home(request):
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('accounts.urls')),
-    path('',home)
+    path('', include('accounts.urls')),  # This will make accounts the defaul
     # Other app URLs will be added later
 ]
 

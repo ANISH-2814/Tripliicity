@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+
+{% block title %}Profile - Triplicity{% endblock %}
+
+{% block content %}
+<!-- Navigation (same as dashboard) -->
+<nav class="navbar navbar-expand-lg dashboard-nav">
+    <div class="container">
+        <a class="navbar-brand text-white fw-bold" href="{% url 'accounts:dashboard' %}">
+            <i class="fas fa-plane me-2"></i>Triplicity
+        </a>
+        
+        <div class="navbar-nav ms-auto">
+            <div class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">
+                    {% if user.profile_picture %}
+                        <img src="{{ user.profile_picture.url }}" alt="Profile" class="rounded-circle me-2" width="30" height="30">
+                    {% else %}
+                        <i class="fas fa-user-circle me-2"></i>
+                    {% endif %}
+                    {{ user.get_full_name }}
+                </a>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="{% url 'accounts:dashboard' %}">
+                        <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                    </a></li>
+                    <li><a class="dropdown-item" href="{% url 'accounts:profile' %}">
+                        <i class="fas fa-user me-2"></i>Profile
+                    </a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="{% url 'accounts:logout' %}">
+                        <i class="fas fa-sign-out-alt me-2"></i>Logout
+                    </a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Profile Content -->
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-user-edit me-2"></i>Edit Profile</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <!-- Personal Information -->
+                        <h5 class="mb-3"><i class="fas fa-user me-2"></i>Personal Information</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">First Name</label>
+                                    {{ form.first_name }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Last Name</label>
+                                    {{ form.last_name }}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Phone</label>
+                                    {{ form.phone }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Date of Birth</label>
+                                    {{ form.date_of_birth }}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Profile Picture -->
+                        <div class="mb-3">
+                            <label class="form-label">Profile Picture</label>
+                            {{ form.profile_picture }}
+                        </div>
+                        
+                        <!-- Address Information -->
+                        <h5 class="mb-3 mt-4"><i class="fas fa-map-marker-alt me-2"></i>Address Information</h5>
+                        <div class="mb-3">
+                            <label class="form-label">Address</label>
+                            {{ form.address }}
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">City</label>
+                                    {{ form.city }}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">State</label>
+                                    {{ form.state }}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Postal Code</label>
+                                    {{ form.postal_code }}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Country</label>
+                            {{ form.country }}
+                        </div>
+                        
+                        <!-- Travel Preferences -->
+                        <h5 class="mb-3 mt-4"><i class="fas fa-heart me-2"></i>Travel Preferences</h5>
+                        <div class="mb-3">
+                            <label class="form-label">Preferred Destinations</label>
+                            {{ form.preferred_destinations }}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Travel Interests</label>
+                            {{ form.travel_interests }}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Budget Range</label>
+                            {{ form.budget_range }}
+                        </div>
+                        
+                        <!-- Submit Button -->
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-save me-2"></i>Update Profile
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
