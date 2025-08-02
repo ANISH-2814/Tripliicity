@@ -49,6 +49,23 @@
             <div class="col-md-12">
                 <div class="card shadow">
                     <div class="card-body">
+                        {% if missing_details %}
+                        <div class="alert alert-warning d-flex align-items-center" role="alert">
+                            <i class="fas fa-exclamation-triangle fa-lg me-2 text-warning"></i>
+                            <div>
+                                <strong>Complete your profile!</strong>
+                                <span>For the best booking experience, please provide your full personal details.</span>
+                                <ul class="mb-1">
+                                    {% for item in missing_fields %}
+                                    <li class="small"><code>{{ item|capfirst }}</code> is missing</li>
+                                    {% endfor %}
+                                </ul>
+                                <a href="{% url 'accounts:profile' %}" class="btn btn-sm btn-primary mt-2">
+                                    <i class="fas fa-user-edit me-1"></i> Update Profile
+                                </a>
+                            </div>
+                        </div>
+                        {% endif %}
                         <h2 class="card-title">
                             <i class="fas fa-tachometer-alt me-2"></i>Welcome, {{ user.get_full_name }}!
                         </h2>
