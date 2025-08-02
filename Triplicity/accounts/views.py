@@ -5,8 +5,9 @@ from django.contrib import messages
 from django.views import View
 from django.core.mail import send_mail
 from django.conf import settings
-from .forms import SimpleRegistrationForm, SimpleLoginForm
+from .forms import SimpleRegistrationForm, SimpleLoginForm, UserProfileForm
 from .models import User
+
 
 
 class RegisterView(View):
@@ -160,9 +161,34 @@ class LoginView(View):
 
 @login_required
 def dashboard_view(request):
+    user = request.user
+    # Define required fields
+    required_fields = [
+        'first_name', 'last_name', 'phone', 'address', 'city',
+        'state', 'country', 'postal_code', 'date_of_birth'
+    ]
+    # Check which fields are missing or blank
+    missing_fields = [field for field in required_fields if not getattr(user, field)]
+    missing_details = bool(missing_fields)
+
     return render(request, 'accounts/dashboard.html', {
-        'user': request.user
+        'user': user,
+        'missing_details': missing_details,
+        'missing_fields': missing_fields,   
     })
+
+@login_required
+def edit_profile_view(request):
+    user = request.user
+    if request.method == 'POST':
+        form = UserProfileForm(request.POST, request.FILES, instance=user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Profile updated successfully!')
+            return redirect('accounts:profile')
+    else:
+        form = UserProfileForm(instance=user)
+    return render(request, 'accounts/edit_profile.html', {'form': form, 'user': user})
 
 
 def logout_view(request):
