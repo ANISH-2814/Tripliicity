@@ -7,6 +7,10 @@ from django.core.mail import send_mail
 from django.conf import settings
 from .forms import SimpleRegistrationForm, SimpleLoginForm
 from .models import User
+import threading
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def home_view(request):
@@ -166,92 +170,74 @@ class RegisterView(View):
         if form.is_valid():
             user = form.save()
             
-            # Send simple welcome email
-            self.send_welcome_email(user)
+            # Send welcome email asynchronously (non-blocking)
+            self.send_welcome_email_async(user)
             
-            # Auto login the user
+            # Auto login the user immediately
             login(request, user)
             
-            messages.success(request, f'Welcome to Triplicity, {user.get_full_name()}! A confirmation email has been sent to {user.email}.')
+            messages.success(request, f'Welcome to Triplicity, {user.get_full_name()}! A confirmation email is being sent to {user.email}.')
             return redirect('accounts:home')
         
         return render(request, self.template_name, {'form': form})
+
+    def send_welcome_email_async(self, user):
+        """Send welcome email in background thread to avoid blocking user registration"""
+        def send_email():
+            try:
+                self.send_welcome_email(user)
+                logger.info(f"Welcome email sent successfully to {user.email}")
+            except Exception as e:
+                logger.error(f"Failed to send welcome email to {user.email}: {e}")
+        
+        # Send email in background thread
+        email_thread = threading.Thread(target=send_email)
+        email_thread.daemon = True  # Thread will close when main program exits
+        email_thread.start()
 
     def send_welcome_email(self, user):
         """Send enhanced welcome email"""
         subject = 'Welcome to Triplicity! 🛫'
         
-        # HTML email content
+        # Simplified HTML email content for faster processing
         html_message = f"""
         <!DOCTYPE html>
         <html>
         <head>
             <style>
-                body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
-                .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
-                .header {{ background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }}
-                .content {{ background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px; }}
-                .footer {{ text-align: center; margin-top: 20px; color: #666; font-size: 12px; }}
-                .btn {{ display: inline-block; padding: 12px 24px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none; border-radius: 5px; margin: 10px 0; }}
+                body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; }}
+                .header {{ background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }}
+                .content {{ background: #f8f9fa; padding: 20px; border-radius: 0 0 8px 8px; }}
+                .btn {{ display: inline-block; padding: 10px 20px; background: #667eea; color: white; text-decoration: none; border-radius: 4px; }}
             </style>
         </head>
         <body>
-            <div class="container">
-                <div class="header">
-                    <h1>🛫 Welcome to Triplicity!</h1>
-                    <p>Your Travel Adventure Begins Here</p>
+            <div class="header">
+                <h1>🛫 Welcome to Triplicity!</h1>
+            </div>
+            <div class="content">
+                <h2>Hello {user.get_full_name()}!</h2>
+                <p>Thank you for joining Triplicity! We're excited to help you discover amazing travel destinations.</p>
+                <p><strong>Your Account:</strong> {user.email}</p>
+                <p><strong>Status:</strong> Active ✅</p>
+                <div style="text-align: center; margin: 20px 0;">
+                    <a href="http://127.0.0.1:8000/accounts/dashboard/" class="btn">Go to Dashboard</a>
                 </div>
-                <div class="content">
-                    <h2>Hello {user.get_full_name()}!</h2>
-                    <p>Thank you for joining Triplicity! We're excited to help you discover amazing travel destinations and create unforgettable memories.</p>
-                    
-                    <p><strong>Your Account Details:</strong></p>
-                    <ul>
-                        <li><strong>Email:</strong> {user.email}</li>
-                        <li><strong>Account Status:</strong> Active ✅</li>
-                        <li><strong>Registration Date:</strong> {user.created_at.strftime('%B %d, %Y')}</li>
-                    </ul>
-                    
-                    <p>What's next?</p>
-                    <ul>
-                        <li>🏨 Browse our amazing hotel deals</li>
-                        <li>✈️ Discover exciting travel packages</li>
-                        <li>🗺️ Plan your dream vacation</li>
-                        <li>📱 Book with confidence</li>
-                    </ul>
-                    
-                    <div style="text-align: center; margin: 30px 0;">
-                        <a href="http://127.0.0.1:8000/accounts/dashboard/" class="btn">
-                            Go to Your Dashboard
-                        </a>
-                    </div>
-                    
-                    <p>If you have any questions, feel free to contact our support team.</p>
-                    
-                    <p>Happy travels!<br>
-                    <strong>The Triplicity Team</strong></p>
-                </div>
-                <div class="footer">
-                    <p>© 2025 Triplicity. All rights reserved.</p>
-                    <p>This email was sent to {user.email}</p>
-                </div>
+                <p>Happy travels!<br><strong>The Triplicity Team</strong></p>
             </div>
         </body>
         </html>
         """
         
-        # Plain text version
+        # Simplified plain text version
         plain_message = f"""
         Welcome to Triplicity, {user.get_full_name()}!
         
-        Thank you for joining our travel community. Your account has been successfully created.
+        Your account has been successfully created.
+        Email: {user.email}
+        Status: Active
         
-        Account Details:
-        - Email: {user.email}
-        - Status: Active
-        - Registration: {user.created_at.strftime('%B %d, %Y')}
-        
-        Visit your dashboard: http://127.0.0.1:8000/accounts/dashboard/
+        Visit: http://127.0.0.1:8000/accounts/dashboard/
         
         Happy travels!
         The Triplicity Team
@@ -267,11 +253,14 @@ class RegisterView(View):
                 to=[user.email]
             )
             email.attach_alternative(html_message, "text/html")
-            email.send()
             
+            # Send with timeout to prevent hanging
+            email.send(fail_silently=False)
             return True
+            
         except Exception as e:
-            print(f"Error sending welcome email: {e}")
+            logger.error(f"Error sending welcome email to {user.email}: {e}")
+            # Don't raise exception to avoid blocking user registration
             return False
 
 

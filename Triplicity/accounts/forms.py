@@ -50,8 +50,10 @@ class SimpleRegistrationForm(UserCreationForm):
 
     def clean_email(self):
         email = self.cleaned_data.get('email')
-        if User.objects.filter(email=email).exists():
-            raise forms.ValidationError("A user with this email already exists.")
+        if email:
+            # Use only() to fetch only the email field for better performance
+            if User.objects.filter(email=email).only('email').exists():
+                raise forms.ValidationError("A user with this email already exists.")
         return email
 
     def save(self, commit=True):
@@ -86,7 +88,8 @@ class SimpleLoginForm(AuthenticationForm):
         email = self.cleaned_data.get('username')
         if email:
             try:
-                user = User.objects.get(email=email)
+                # Use only() to fetch only necessary fields for better performance
+                user = User.objects.only('username', 'email').get(email=email)
                 return user.username
             except User.DoesNotExist:
                 raise forms.ValidationError("No account found with this email address.")
