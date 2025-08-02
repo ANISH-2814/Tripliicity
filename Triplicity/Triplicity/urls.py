@@ -9,6 +9,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('home.urls')),  # This will make accounts the default
     path('accounts/', include('accounts.urls')),
+    path('packages/', include('packages.urls'))
     # Other app URLs will be added later
 ]
 
