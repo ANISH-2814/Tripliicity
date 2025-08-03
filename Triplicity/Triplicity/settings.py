@@ -18,11 +18,17 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-##r1vx9$^*@^1ws3_57mq
 DEBUG = config('DEBUG', default=False, cast=bool)
 #DEBUG = True
 
-ALLOWED_HOSTS = [    
-    'localhost',
-    '127.0.0.1',
-    '.onrender.com'
-    ]
+ALLOWED_HOSTS = [
+    'tripliicity.onrender.com',
+    'yourcustomdomain.com',
+    'www.yourcustomdomain.com',
+]
+CSRF_TRUSTED_ORIGINS = [
+    'https://tripliicity.onrender.com',
+    'https://yourcustomdomain.com',
+    'https://www.yourcustomdomain.com',
+]
+
 
 # Application definition
 
