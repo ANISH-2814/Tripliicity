@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ package.title }} - Triplicity Holiday Package</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Bootstrap CSS & FontAwesome -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { background: #f9fafc; }
+        .card-img { width: 100%; max-height: 320px; object-fit: cover; }
+        .badge-incl { background: #667eea; }
+    </style>
+</head>
+<body>
+<!-- Header (same as above) -->
+<nav class="navbar navbar-expand-lg fixed-top">
+    <div class="container">
+        <a class="navbar-brand" href="{% url 'home:homepage' %}">
+            <i class="fas fa-plane me-2"></i>Triplicity
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item"><a class="nav-link" href="{% url 'packages:list' %}">Holidays</a></li>
+                <li class="nav-item"><a class="nav-link" href="#hotels">Hotels</a></li>
+                <li class="nav-item"><a class="nav-link" href="#flights">Flights</a></li>
+                <li class="nav-item"><a class="nav-link" href="#about">About Us</a></li>
+            </ul>
+            <ul class="navbar-nav">
+                {% if user.is_authenticated %}
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-user me-1"></i>{{ user.get_full_name }}
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{% url 'accounts:dashboard' %}">
+                            <i class="fas fa-tachometer-alt me-2"></i>Dashboard</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="{% url 'accounts:logout' %}">
+                            <i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                    </ul>
+                </li>
+                {% else %}
+                <li class="nav-item"><a class="nav-link" href="{% url 'accounts:login' %}">Login</a></li>
+                <li class="nav-item"><a class="btn btn-primary ms-2" href="{% url 'accounts:register' %}">Sign Up</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Package Detail Content -->
+<div class="container" style="margin-top:110px;">
+    <div class="row">
+        <div class="col-lg-7 mb-4">
+            {% if package.image %}
+                <img src="{{ package.image.url }}" class="rounded shadow card-img" alt="{{ package.title }}">
+            {% else %}
+                <div class="bg-secondary card-img" style="height:300px;"></div>
+            {% endif %}
+        </div>
+        <div class="col-lg-5">
+            <h2>{{ package.title }}</h2>
+            <p class="lead">{{ package.category.name }}</p>
+            <p class="mb-1"><span class="badge bg-success"><i class="fas fa-star"></i> {{ package.rating }}</span></p>
+            <div class="fw-bold text-primary mb-1 fs-5">₹{{ package.price|floatformat:0 }} <span class="fs-6 text-muted">/ {{ package.duration }}</span></div>
+            <div class="mb-2">
+                {% for incl in package.get_inclusions %}
+                    <span class="badge badge-incl">{{ incl }}</span>
+                {% endfor %}
+            </div>
+            <div class="my-3">
+                <h5>Itinerary Preview</h5>
+                <div class="text-muted">{{ package.short_itinerary|default:"Contact us for detailed itinerary." }}</div>
+            </div>
+            <a href="{% url 'bookings:create_booking' package.slug %}" class="btn btn-success btn-lg mt-2">Book Now</a>
+
+        </div>
+    </div>
+</div>
+
+<!-- Footer (same as above) -->
+<footer class="footer mt-5">
+    <div class="container">
+        <!-- ... (footer code exactly as you wrote; omitted for brevity) ... -->
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
