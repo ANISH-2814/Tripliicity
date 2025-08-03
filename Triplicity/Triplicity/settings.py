@@ -132,6 +132,12 @@ USE_I18N = True
 USE_TZ = True
 
 
+# STRIPE_PUBLIC_KEY = os.environ.get('STRIPE_PUBLIC_KEY')
+# STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY')
+
+STRIPE_PUBLIC_KEY = config('STRIPE_PUBLIC_KEY', default='')
+STRIPE_SECRET_KEY = config('STRIPE_SECRET_KEY', default='')
+
 # Static files (CSS, JavaScript, Images)
 
 #STATIC_URL = 'static/'
@@ -148,9 +154,6 @@ CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap4"
 CRISPY_TEMPLATE_PACK = "bootstrap4"
 
 # Email Configuration
-
-# configure this later
-# For now, using SMTP with Gmail as an example
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = config('EMAIL_HOST', default='smtp.gmail.com')
