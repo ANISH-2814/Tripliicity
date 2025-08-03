@@ -91,3 +91,19 @@ class SimpleLoginForm(AuthenticationForm):
             except User.DoesNotExist:
                 raise forms.ValidationError("No account found with this email address.")
         return email
+    
+
+class UserProfileForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = [
+            'first_name', 'last_name', 'email', 'phone', 'address', 'city',
+            'state', 'country', 'postal_code', 'date_of_birth', 'profile_picture',
+            'preferred_destinations', 'travel_interests', 'budget_range'
+        ]
+        widgets = {
+            'date_of_birth': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'address': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'preferred_destinations': forms.Textarea(attrs={'class': 'form-control', 'rows': 2, 'placeholder': 'e.g., Goa, Kerala'}),
+            'travel_interests': forms.Textarea(attrs={'class': 'form-control', 'rows': 2, 'placeholder': 'e.g., Adventure, Beaches'}),
+        }
