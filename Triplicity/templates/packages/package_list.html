@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Travel Packages - Triplicity</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Bootstrap CSS & FontAwesome -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { background: #f9fafc; }
+        /* Sidebar */
+        .package-sidebar {
+            position: sticky;
+            top: 90px;
+        }
+        .card-img-top { height: 180px; object-fit: cover; }
+        .category-active { background: #667eea; color: #fff !important; }
+        .category-link { color: #333; text-decoration: none; }
+        .category-link:hover { color: #667eea; }
+        /* Package card */
+        .badge-incl { background: #667eea; }
+        .card-title { min-height: 3em; }
+    </style>
+</head>
+<body>
+<!-- Header -->
+<nav class="navbar navbar-expand-lg fixed-top">
+    <div class="container">
+        <a class="navbar-brand" href="{% url 'home:homepage' %}">
+            <i class="fas fa-plane me-2"></i>Triplicity
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item"><a class="nav-link" href="{% url 'packages:list' %}">Holidays</a></li>
+                <li class="nav-item"><a class="nav-link" href="#hotels">Hotels</a></li>
+                <li class="nav-item"><a class="nav-link" href="#flights">Flights</a></li>
+                <li class="nav-item"><a class="nav-link" href="#about">About Us</a></li>
+            </ul>
+            <ul class="navbar-nav">
+                {% if user.is_authenticated %}
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-user me-1"></i>{{ user.get_full_name }}
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{% url 'accounts:dashboard' %}">
+                            <i class="fas fa-tachometer-alt me-2"></i>Dashboard</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="{% url 'accounts:logout' %}">
+                            <i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                    </ul>
+                </li>
+                {% else %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'accounts:login' %}">Login</a>
+                </li>
+                <li class="nav-item">
+                    <a class="btn btn-primary ms-2" href="{% url 'accounts:register' %}">Sign Up</a>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<div class="container" style="margin-top:100px;">
+    <div class="row">
+        <!-- Category List -->
+        <aside class="col-md-3 package-sidebar mb-4">
+            <div class="list-group">
+                <a href="{% url 'packages:list' %}" class="list-group-item list-group-item-action {% if not selected_category %}category-active{% endif %}">
+                    All Packages
+                </a>
+                {% for cat in categories %}
+                <a href="{% url 'packages:list_by_category' cat.slug %}" class="list-group-item list-group-item-action {% if selected_category and selected_category == cat %}category-active{% endif %}">
+                    {{ cat.name }}
+                </a>
+                {% endfor %}
+            </div>
+        </aside>
+        <!-- Package cards -->
+        <div class="col-md-9">
+            <h3 class="mb-4">
+                {% if selected_category %}{{ selected_category.name }}{% else %}Our Top Packages{% endif %}
+            </h3>
+            <div class="row">
+                {% for pkg in packages %}
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="card h-100 shadow">
+                        {% if pkg.image %}
+                            <img src="{{ pkg.image.url }}" class="card-img-top" alt="{{ pkg.title }}">
+                        {% else %}
+                            <div class="bg-secondary card-img-top" style="height:180px;"></div>
+                        {% endif %}
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">{{ pkg.title }}</h5>
+                            <div class="mb-1 text-muted small">
+                                <i class="fas fa-star text-warning"></i> {{ pkg.rating }} &nbsp; | &nbsp; {{ pkg.duration }}
+                            </div>
+                            <div>
+                                {% for incl in pkg.get_inclusions %}
+                                <span class="badge badge-incl">{{ incl }}</span>
+                                {% endfor %}
+                            </div>
+                            <p class="mt-2 card-text">{{ pkg.short_itinerary|truncatewords:12 }}</p>
+                            <div class="mt-auto">
+                                <span class="fw-bold text-success">₹{{ pkg.price|floatformat:0 }}</span>
+                                <a href="{% url 'packages:detail' pkg.slug %}" class="btn btn-outline-primary btn-sm float-end mt-1">View Details</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12">
+                    <div class="alert alert-info mt-5">No packages found in this category.</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="footer mt-5">
+    <div class="container">
+        <!-- ... (footer code exactly as you wrote; omitted for brevity) ... -->
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

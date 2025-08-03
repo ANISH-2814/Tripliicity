@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pay for Booking - Triplicity</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://js.stripe.com/v3/"></script>
+</head>
+
+<body>
+    <div class="container mt-5">
+        <h2 class="mb-4">Pay for: <b>{{ package.title }}</b></h2>
+        <p>Total Amount: <b>₹{{ booking.total_amount|floatformat:0 }}</b> (for {{ booking.person_count }} person(s))</p>
+
+        <!-- Payment form -->
+        <form id="payment-form">
+            <div id="payment-element" class="mb-4">
+                <!-- Stripe Elements will create form elements here -->
+            </div>
+            <button class="btn btn-primary" id="submit-payment" type="submit">
+                <span id="button-text">Pay Now</span>
+                <div id="spinner" class="spinner-border spinner-border-sm d-none" role="status">
+                    <span class="visually-hidden">Processing...</span>
+                </div>
+            </button>
+            <div id="error-message" class="text-danger mt-2"></div>
+        </form>
+    </div>
+
+    <script>
+        // Initialize Stripe
+        const stripe = Stripe('{{ stripe_public_key }}');
+
+        let elements;
+        let paymentElement;
+
+        initialize();
+
+        // Initialize the payment form
+        async function initialize() {
+            const clientSecret = "{{ client_secret }}";
+
+            elements = stripe.elements({
+                clientSecret: clientSecret
+            });
+
+            paymentElement = elements.create("payment");
+            paymentElement.mount("#payment-element");
+        }
+
+        // Handle form submission
+        document.getElementById('payment-form').addEventListener('submit', handleSubmit);
+
+        async function handleSubmit(e) {
+            e.preventDefault();
+            setLoading(true);
+
+            const { error } = await stripe.confirmPayment({
+                elements,
+                confirmParams: {
+                    // Make sure to change this to your payment completion page
+                    return_url: "{{ request.build_absolute_uri }}/complete/",
+                },
+                redirect: "if_required"
+            });
+
+            if (error) {
+                // This point will only be reached if there is an immediate error when
+                // confirming the payment. Show error to your customer (for example, payment
+                // details incomplete)
+                showMessage(error.message);
+                setLoading(false);
+            } else {
+                // Payment succeeded - handle completion
+                handlePaymentSuccess();
+            }
+        }
+
+        async function handlePaymentSuccess() {
+            try {
+                const response = await fetch("{% url 'bookings:payment_complete' %}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": "{{ csrf_token }}"
+                    },
+                    body: JSON.stringify({
+                        "booking_id": "{{ booking.id }}",
+                        "payment_intent_id": "{{ booking.payment_intent_id }}"
+                    })
+                });
+
+                if (response.ok) {
+                    const html = await response.text();
+                    document.body.innerHTML = html;
+                } else {
+                    showMessage("Payment processing failed. Please contact support.");
+                }
+            } catch (error) {
+                showMessage("Network error. Please try again.");
+            }
+            setLoading(false);
+        }
+
+        // Show error message to customer
+        function showMessage(messageText) {
+            const messageContainer = document.querySelector("#error-message");
+            messageContainer.textContent = messageText;
+        }
+
+        // Show a spinner on payment submission
+        function setLoading(isLoading) {
+            const submitButton = document.querySelector("#submit-payment");
+            const spinner = document.querySelector("#spinner");
+            const buttonText = document.querySelector("#button-text");
+
+            if (isLoading) {
+                submitButton.disabled = true;
+                spinner.classList.remove("d-none");
+                buttonText.textContent = "Processing...";
+            } else {
+                submitButton.disabled = false;
+                spinner.classList.add("d-none");
+                buttonText.textContent = "Pay Now";
+            }
+        }
+    </script>
+</body>
+
+</html>
