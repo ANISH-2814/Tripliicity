@@ -7,8 +7,12 @@ from django.core.mail import send_mail
 from django.conf import settings
 from .forms import SimpleRegistrationForm, SimpleLoginForm, UserProfileForm
 from .models import User
+import threading
 
 
+def send_welcome_email_async(user, send_func):
+    thread = threading.Thread(target=send_func, args=(user,))
+    thread.start()
 
 class RegisterView(View):
     template_name = 'accounts/register.html'
@@ -25,13 +29,13 @@ class RegisterView(View):
         if form.is_valid():
             user = form.save()
             
-            # Send simple welcome email
-            self.send_welcome_email(user)
+            # Send welcome email asynchronously (non-blocking)
+            send_welcome_email_async(user, self.send_welcome_email)
             
-            # Auto login the user
+            # Auto login the user immediately
             login(request, user)
             
-            messages.success(request, f'Welcome to Triplicity, {user.get_full_name()}! A confirmation email has been sent to {user.email}.')
+            messages.success(request, f'Welcome to Triplicity, {user.get_full_name()}! A confirmation email will be sent to {user.email} shortly.')
             return redirect('home:homepage')
         
         return render(request, self.template_name, {'form': form})
@@ -68,7 +72,7 @@ class RegisterView(View):
                     <ul>
                         <li><strong>Email:</strong> {user.email}</li>
                         <li><strong>Account Status:</strong> Active ✅</li>
-                        <li><strong>Registration Date:</strong> {user.created_at.strftime('%B %d, %Y')}</li>
+                        <li><strong>Registration Date:</strong> {user.date_joined.strftime('%B %d, %Y')}</li>
                     </ul>
                     
                     <p>What's next?</p>
@@ -108,7 +112,7 @@ class RegisterView(View):
         Account Details:
         - Email: {user.email}
         - Status: Active
-        - Registration: {user.created_at.strftime('%B %d, %Y')}
+        - Registration: {user.date_joined.strftime('%B %d, %Y')}
         
         Visit your dashboard: http://127.0.0.1:8000/accounts/dashboard/
         
