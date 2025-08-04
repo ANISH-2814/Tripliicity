@@ -22,6 +22,9 @@ ALLOWED_HOSTS = [
     'tripliicity.onrender.com',
     'yourcustomdomain.com',
     'www.yourcustomdomain.com',
+    'http://127.0.0.1'
+    'http://localhost',
+    'localhost',
 ]
 CSRF_TRUSTED_ORIGINS = [
     'https://tripliicity.onrender.com',
