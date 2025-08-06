@@ -22,8 +22,7 @@ ALLOWED_HOSTS = [
     '127.0.0.1',
     'localhost',
     'tripliicity.onrender.com',
-    'yourcustomdomain.com',
-    'www.yourcustomdomain.com',
+    'host.docker.internal'
 
 ]
 CSRF_TRUSTED_ORIGINS = [
@@ -57,6 +56,7 @@ DJANGO_APPS = [
 THIRD_PARTY_APPS = [
     'crispy_forms',
     'crispy_bootstrap4',
+    'django_prometheus'
 ]
 
 LOCAL_APPS = [
@@ -71,6 +71,7 @@ LOCAL_APPS = [
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
 MIDDLEWARE = [
+    'django_prometheus.middleware.PrometheusBeforeMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -78,6 +79,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django_prometheus.middleware.PrometheusAfterMiddleware'
 ]
 
 ROOT_URLCONF = 'Triplicity.urls'
