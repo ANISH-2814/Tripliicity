@@ -11,6 +11,7 @@ urlpatterns = [
     path('accounts/', include('accounts.urls')),
     path('packages/', include('packages.urls')),
     path('bookings/', include('bookings.urls')),
+    path('', include('django_prometheus.urls')),
     # Other app URLs will be added later
 ]
 
