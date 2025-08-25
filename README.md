@@ -22,9 +22,9 @@ Triplicity is a full-featured travel and tour booking platform built with **Djan
 - **Backend**: Python 3.12, Django 4.x
 - **Database**: PostgreSQL
 - **Frontend**: HTML5, CSS3, Bootstrap 5, FontAwesome
-- **Payments**: Stripe or Razorpay
+- **Payments**: Stripe
 - **Email**: Gmail SMTP (or any compatible SMTP server)
-- **Cloud Ready**: Works with Render, Railway, DigitalOcean, etc.
+- **Cloud Ready**: Deployed on Render.
 
 ---
 
@@ -149,7 +149,7 @@ Stripe integration ensures secure, real-time transactions.
 
 ---
 
-## ☁️ Deployment (Render, Railway, etc.)
+## ☁️ Deployment (Render)
 
 Triplicity is ready for cloud deployment:
 - One-click PostgreSQL setup
